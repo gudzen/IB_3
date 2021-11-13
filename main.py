@@ -138,9 +138,10 @@ else:
     if args.encryption is not None:
         encryption(resource[0], resource[1], resource[2], resource[3], resource[6])
     else:
-        decryption(resource[2], resource[1], resource[3], resource[5], resource[6])
-
-
-generation(resource[3], resource[4], resource[2])
-encryption(resource[0], resource[1], resource[2], resource[3], resource[6])
-decryption(resource[2], resource[1], resource[3], resource[5], resource[6])
+        if args.decryption is not None:
+            decryption(resource[2], resource[1], resource[3], resource[5], resource[6])
+        else:
+            if args.u is not None:
+                generation(resource[3], resource[4], resource[2])
+                encryption(resource[0], resource[1], resource[2], resource[3], resource[6])
+                decryption(resource[2], resource[1], resource[3], resource[5], resource[6])
