@@ -8,15 +8,13 @@ from cryptography.hazmat.primitives.serialization import load_pem_private_key
 from cryptography.hazmat.primitives.ciphers import Cipher, algorithms, modes
 
 parser = argparse.ArgumentParser()
-# group = parser.add_mutually_exclusive_group(required=True)
-"""
+parser.add_argument('path', help='Путь к папке с файлами')
+group = parser.add_mutually_exclusive_group(required = True)
 group.add_argument('-gen', '--generation', help='Запускает режим генерации ключей')
 group.add_argument('-enc', '--encryption', help='Запускает режим шифрования')
 group.add_argument('-dec', '--decryption', help='Запускает режим дешифрования')
-"""
-parser.add_argument('path', help='Путь к папке с файлами')
-# group.add_argument('-u', help='Запуск генерации шифровки и расшифровки')
 args = parser.parse_args()
+
 
 # path = "C:\\Users\\79371\\Desktop\\resources"
 symmetric_key = args.path + "\\symmetric_key.txt"
@@ -132,6 +130,15 @@ def decryption(private_p, encrypt_t, symmetric_k, decrypt_t, vec_init):
     time.sleep(1)
     print("\nText decrypted and serialized at:", decrypt_t, "\n")
     pass
+
+
+if args.generation is not None:
+    generation(resource[3], resource[4], resource[2])
+else:
+    if args.encryption is not None:
+        encryption(resource[0], resource[1], resource[2], resource[3], resource[6])
+    else:
+        decryption(resource[2], resource[1], resource[3], resource[5], resource[6])
 
 
 generation(resource[3], resource[4], resource[2])
