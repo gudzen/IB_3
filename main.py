@@ -25,7 +25,8 @@ private_pem = args.path + "\\private.pem"
 orig_text = args.path + "\\orig.txt"
 encrypt_text = args.path + "\\encrypt.txt"
 decrypt_text = args.path + "\\decrypt.txt"
-resource = (orig_text, encrypt_text, private_pem, symmetric_key, public_pem, decrypt_text)
+vector_init = args.path + "\\iv"
+resource = (orig_text, encrypt_text, private_pem, symmetric_key, public_pem, decrypt_text, vector_init)
 
 
 def generation(symmetric_k, public_p, private_p):
@@ -69,7 +70,7 @@ def generation(symmetric_k, public_p, private_p):
     pass
 
 
-def encryption(orig_t, encrypt_t, private_p, symmetric_k):
+def encryption(orig_t, encrypt_t, private_p, symmetric_k, vec_init):
     with open(private_p, 'rb') as pem_in:
         private_bytes = pem_in.read()
     private_key = load_pem_private_key(private_bytes, password=None, )
@@ -88,6 +89,8 @@ def encryption(orig_t, encrypt_t, private_p, symmetric_k):
     padded_text = pad.update(text) + pad.finalize()
     # случайное значение для инициализации блочного режима, должно быть размером с блок и каждый раз новым
     iv = os.urandom(8)
+    with open(vec_init, 'wb') as iv_file:
+        iv_file.write(iv)
     cipher = Cipher(algorithms.CAST5(d_key), modes.CBC(iv))
     encryptor = cipher.encryptor()
     c_text = encryptor.update(padded_text) + encryptor.finalize()
@@ -98,7 +101,7 @@ def encryption(orig_t, encrypt_t, private_p, symmetric_k):
     pass
 
 
-def decryption(private_p, encrypt_t, symmetric_k, decrypt_t):
+def decryption(private_p, encrypt_t, symmetric_k, decrypt_t, vec_init):
     with open(private_p, 'rb') as pem_in:
         private_bytes = pem_in.read()
     private_key = load_pem_private_key(private_bytes, password=None, )
@@ -111,7 +114,8 @@ def decryption(private_p, encrypt_t, symmetric_k, decrypt_t):
     with open(encrypt_t, 'rb') as e_text:
         text = e_text.read()
     # дешифрование и депаддинг текста симметричным алгоритмом
-    iv = os.urandom(8)
+    with open(vec_init, 'rb') as iv_file:
+        iv = iv_file.read()
     cipher = Cipher(algorithms.CAST5(d_key), modes.CBC(iv))
     decrypter = cipher.decryptor()
     from cryptography.hazmat.primitives import padding
@@ -119,17 +123,17 @@ def decryption(private_p, encrypt_t, symmetric_k, decrypt_t):
     d_text = unpadded.update(decrypter.update(text) + decrypter.finalize()) + unpadded.finalize()
     time.sleep(1)
     print("Text:\n")
-    print(d_text.decode('latin-1'))
+    print(d_text.decode('UTF-8'))
     time.sleep(1)
     print("\nText (bytes):\n")
     print(d_text)
-    with open(decrypt_t, 'w', encoding='latin-1') as decrypt_file:
-        decrypt_file.write(d_text.decode('latin-1'))
+    with open(decrypt_t, 'w', encoding='UTF-8') as decrypt_file:
+        decrypt_file.write(d_text.decode('UTF-8'))
     time.sleep(1)
     print("\nText decrypted and serialized at:", decrypt_t, "\n")
     pass
 
 
 generation(resource[3], resource[4], resource[2])
-encryption(resource[0], resource[1], resource[2], resource[3])
-decryption(resource[2], resource[1], resource[3], resource[5])
+encryption(resource[0], resource[1], resource[2], resource[3], resource[6])
+decryption(resource[2], resource[1], resource[3], resource[5], resource[6])
